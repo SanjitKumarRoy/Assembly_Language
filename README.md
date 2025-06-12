@@ -1,7 +1,8 @@
 # Tutorial on Assembly Language Programming
 
+## Run `Assembly Program`
 ### Step 1: Install NASM and Build Tools
-Open a terminal and run the following commands to install NASM and the required build tools:
+Open a terminal and run the following commands to install `NASM` and the required build tools:
 ```bash
 sudo apt update
 sudo apt install nasm build-essential
@@ -9,27 +10,7 @@ sudo apt install nasm build-essential
 
 ### Step 2: Create the Assembly File
 Create a file name `hello.asm`
-```bash
-section .data
-    msg db "Hello, Linux!", 0xA    ; message + newline
-    len equ $ - msg                ; calculate length of message
 
-section .text
-    global _start
-
-_start:
-    ; write(1, msg, len)
-    mov rax, 1       ; syscall number for write
-    mov rdi, 1       ; file descriptor (stdout)
-    mov rsi, msg     ; address of the message
-    mov rdx, len     ; length of the message
-    syscall
-
-    ; exit(0)
-    mov rax, 60      ; syscall number for exit
-    xor rdi, rdi     ; status code 0
-    syscall
-```
 
 ```bash
 section .data                 ; Data section — used for initialized data like strings
@@ -64,4 +45,59 @@ ld hello.o -o hello
 ```bash
 ./hello
 ```
+
+## 🐞 Debug with GDB
+### 1. Assemble and Link with Debug Info:
+```bash
+nasm -f elf64 -g main.asm -o main.o
+ld main.o -o main
+```
+### 2. GDB command:
+| Action                       | GDB Command              |
+|-----------------------------|--------------------------|
+| Start GDB                   | `gdb ./main`         |
+| Set breakpoint              | `break _start`           |
+| Run program                 | `run`                    |
+| Step one instruction        | `stepi`                  |
+| Show all registers          | `info registers`         |
+| Print register value (e.g. `al`) | `print $al`             |
+| Show memory value at `A`    | `x/b &A`                 |
+| Show memory address of `A`  | `info address A`         |
+---
+
+## 📄 Example Code Snippet (`main.asm`)
+
+```nasm
+section .data
+    A db 2
+    B db 3
+
+section .text
+    global _start
+
+_start:
+    mov al, [A]
+    add al, [B]
+    mov rax, 60
+    xor rdi, rdi
+    syscall
+```
+
+
+## Register Naming by Bit Width
+|64-bit|32-bit|16-bit|8-bit|Notes|
+|------|------|------|-----|-----|
+|`rax`|`eax`|`ax`|`al`|Accumulator|
+|`rbx`|`ebx`|`bx`|`bl`|Base Register|
+|`rcx`|`ecx`|`cx`|`cl`|Loop Counter|
+|`rdx`|`edx`|`dx`|`dl`|Data Register|
+|`rsi`|`esi`|`si`|`sil`|Source Index|
+|`rdi`|`edi`|`di`|`dil`|Destination Index|
+|`rsp`|`esp`|`sp`|`spl`|Stack Pointer|
+|`rbp`|`ebp`|`bp`|`bpl`|Base Pointer|
+|`r8`|`r8d`|`r8w`|`r8b`|Extended General<br>Purpose Registers|
+|...|...|...|...|Up to `r15`|
+---
+💡 The `r8` – `r15` registers are only available in 64-bit mode.
+
 
